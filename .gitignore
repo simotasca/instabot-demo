@@ -2,3 +2,4 @@ node_modules
 src
 .env
 tsconfig.json
+prisma/database.db
