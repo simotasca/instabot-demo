@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = "debian-openssl-3.0.x"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ActionInfo {
+  key      String
+  value    String
+  action   Action @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  actionId Int
+
+  @@id([key, actionId])
+}
+
+model Action {
+  id              Int              @id @default(autoincrement())
+  type            String
+  date            DateTime         @default(now())
+  ActionInfo      ActionInfo[]
+  LiketaskActions LikeTaskAction[]
+}
+
+model LikeTaskAction {
+  action     Action    @relation(fields: [actionId], references: [id])
+  actionId   Int       @id @unique
+  hashtag    String
+  LikeTask   LikeTask? @relation(fields: [likeTaskId], references: [id])
+  likeTaskId Int?
+}
+
+model LikeTask {
+  id              Int              @id @default(autoincrement())
+  hashtags        String
+  maxPostDays     Int              @default(7)
+  likesPerHashtag Int
+  shuffle         Boolean          @default(false)
+  start           DateTime         @default(now())
+  end             DateTime?
+  actions         LikeTaskAction[]
+}
