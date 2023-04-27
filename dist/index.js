@@ -35,6 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_process_1 = __importDefault(require("node:process"));
 const Logger_1 = __importStar(require("./Logger"));
 const Login_1 = require("./bot/Login");
 const env_1 = require("./utils/env");
@@ -53,6 +54,15 @@ const CONFIGURATION = {
     likesPerHashtag: env_1.env.int("LIKES_PER_HASHTAG"),
     shuffle: env_1.env.bool("SHUFFLE"),
 };
+let browser;
+node_process_1.default.on("beforeExit", (code) => {
+    browser && browser.close();
+    console.log("Process beforeExit event with code: ", code);
+});
+node_process_1.default.on("SIGINT", function () {
+    browser && browser.close();
+    console.log("Caught interrupt signal");
+});
 (() => __awaiter(void 0, void 0, void 0, function* () {
     yield database_1.db.likeTask.create({
         data: {
@@ -62,7 +72,7 @@ const CONFIGURATION = {
             shuffle: !!CONFIGURATION.shuffle,
         },
     });
-    const browser = yield puppeteer_1.default.launch({
+    browser = yield puppeteer_1.default.launch({
         headless: env_1.env.bool("HEADLESS"),
     });
     try {
